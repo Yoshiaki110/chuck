@@ -10,6 +10,9 @@ app.set('port', (process.env.PORT || 5000));
 app.post('/', function(request, response) {
   console.log('post');
   console.log(request.body);
+  console.log(request.body.events[0].beacon.hwid);
+  console.log(request.body.events[0].beacon.dm);
+  console.log(request.body.events[0].beacon.type);
   response.sendStatus(200);
 });
 
