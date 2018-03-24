@@ -5,6 +5,8 @@ var request = require('request');
 var app = express();
 
 var LINE_CHANNEL_ACCESS_TOKEN = setting.LINE_CHANNEL_ACCESS_TOKEN;
+var TWILIO_CALL_URL = setting.TWILIO_CALL_URL;
+var TWILIO_CALL_BODY = setting.TWILIO_CALL_BODY;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -42,7 +44,7 @@ function reply(event, text) {
     });
 }
 
-function reply(id, hwid) {
+function select(id, hwid) {
   var headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
@@ -57,23 +59,23 @@ function reply(id, hwid) {
         type: "buttons",
         thumbnailImageUrl: 'https://shakainomado.azurewebsites.net/chuck.png',
         title: '近くにチャックを開けている人がいます ' + hwid,
-        text: 'どうします？',
+        text: '探して、伝えてもらえませんか？\n恥ずかしいのであれば、こちらが電話で通知します\nどうします？',
         actions: [
           {
             type: 'postback',
-            label: '探して、私が伝えます',
+            label: '私が伝えます',
             data: 'none'
           },
           {
-            type: 'postback',
-            label: '恥ずかしいので、電話で教えてあげてください',
+        s    type: 'postback',
+            label: '電話で教えてあげて',
             data: 'tel'
           }
         ]
       }
     }]
   }
-  console.log(body);
+  //console.log(body);
   var url = 'https://api.line.me/v2/bot/message/push';
   request({
     url: url,
@@ -83,7 +85,7 @@ function reply(id, hwid) {
     json: true
   }, function(error, response, body){
     if (!error && response.statusCode == 200) {
-      console.log(body.name);
+      //console.log(body.name);
     } else {
       console.log('error: '+ response.statusCode);
     }
@@ -117,7 +119,7 @@ app.post('/', function(request, response) {
         }
       } else {
         if (event.beacon.type == 'enter') {
-          reply(event.source.userId, event.beacon.hwid);
+          select(event.source.userId, event.beacon.hwid);
         } else {
           reply(event, 'チャックを開けている人は、離れていきました ' + event.beacon.hwid);
         }
@@ -125,6 +127,9 @@ app.post('/', function(request, response) {
     }
     if (event.type == 'postback') {
       console.log('postback: '+ event.postback.data);
+      if (event.beacon.type == 'tel') {
+        twilio();
+      }
     }
   }
 });
@@ -132,3 +137,20 @@ app.post('/', function(request, response) {
 app.listen(app.get('port'), function() {
   console.log("Node app is running at localhost:" + app.get('port'))
 });
+
+
+function twilio() {
+  var headers = {
+    'Accept': '*/*',
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
+  var body = TWILIO_CALL_BODY;
+  var url = TWILIO_CALL_URL;
+  request({
+    url: url,
+    method: 'POST',
+    headers: headers,
+    body: body,
+    json: false
+  });
+}
