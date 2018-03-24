@@ -67,7 +67,7 @@ function select(id, hwid) {
             data: 'none'
           },
           {
-        s    type: 'postback',
+            type: 'postback',
             label: '電話で教えてあげて',
             data: 'tel'
           }
@@ -127,7 +127,7 @@ app.post('/', function(request, response) {
     }
     if (event.type == 'postback') {
       console.log('postback: '+ event.postback.data);
-      if (event.beacon.type == 'tel') {
+      if (event.postback.data == 'tel') {
         twilio();
       }
     }
