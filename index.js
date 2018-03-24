@@ -111,7 +111,7 @@ app.post('/', function(request, response) {
       console.log('*event.beacon.hwid : ' + event.beacon.hwid);
       console.log('*event.beacon.dm : ' + event.beacon.dm);
       console.log('*event.source.userId : ' + event.source.userId);
-      if (typeof event.beacon.dm === "undefined") {
+      if (typeof event.beacon.dm === "undefined" || typeof event.beacon.dm == "01") {
         if (event.beacon.type == 'enter') {
           reply(event, '近くに装置があります ' + event.beacon.hwid);
         } else {

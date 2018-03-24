@@ -7,18 +7,7 @@ uint8_t sid[] = {0x6F, 0xFE};
 uint8_t sdata[] = {0x6F, 0xFE, 0x02, 0x01, 0xDE, 0xAD, 0xBE, 0xEF, 0x7F, 0x00};
 uint8_t hwid[] = HWID;
 
-void setup() {
-  Serial.begin(9600);
-
-  // put your setup code here, to run once
-  // close peripheral power
-  NRF_POWER->DCDCEN = 0x00000001;
-
-  pinMode(LED, OUTPUT);
-  digitalWrite(LED, HIGH);
-
-  memcpy(&sdata[3], hwid, 5);
-
+void advertising() {
   ble.init(); 
   // set advertisement
   ble.accumulateAdvertisingPayload(GapAdvertisingData::BREDR_NOT_SUPPORTED | GapAdvertisingData::LE_GENERAL_DISCOVERABLE);
@@ -31,14 +20,40 @@ void setup() {
   //  ADV_NON_CONNECTABLE_UNDIRECTED
   ble.setAdvertisingType(GapAdvertisingParams::ADV_NON_CONNECTABLE_UNDIRECTED);
   ble.setAdvertisingInterval(160);   // 100ms; in multiples of 0.625ms
-  ble.setAdvertisingTimeout(10);         // 10秒
+  ble.setAdvertisingTimeout(5);      // 単位は秒
   ble.startAdvertising();
+  ble.waitForEvent();
+  ble.stopAdvertising();
+  ble.shutdown();
+  delay(150);
+}
+void setup() {
+  Serial.begin(9600);
+
+  // put your setup code here, to run once
+  // close peripheral power
+  NRF_POWER->DCDCEN = 0x00000001;
+
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, HIGH);    // LED ON
+  pinMode(D2, INPUT_PULLUP);
+
+  memcpy(&sdata[3], hwid, 5);
 }
 
 void loop() {
-  Serial.println("aaa");
-  // put your main code here, to run repeatedly:
-  ble.waitForEvent();
-  Serial.println("bbb");
+  //Serial.println("aaa");
+  int data = digitalRead(D2);
+  if (data) {
+    digitalWrite(LED, LOW);
+    sdata[9] = 2;
+  } else {
+    digitalWrite(LED, HIGH);
+    sdata[9] = 1;
+  }
+  advertising();
+  Serial.println(data, HEX);
+  delay(150);
+  //Serial.println("bbb");
 }
 
