@@ -40,14 +40,14 @@ function reply(event, text) {
         }
     });
 }
-function reply(req) {
+function reply(id) {
     var headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
     }
 //    console.log(headers);
     var body = {
-        to: req.body.id,
+        to: id,
         messages: [{
             type: 'template',
             altText: '人を発見',
@@ -76,7 +76,7 @@ function reply(req) {
     request({
         url: url,
         method: 'POST',
-        headers: headers,
+        headers: headesrs,
         body: body,
         json: true
     }, function(error, response, body){
@@ -103,11 +103,12 @@ app.post('/', function(request, response) {
     if (event.type == 'message') {
       console.log('message : ' + event.message.text);
     } else if (event.type == 'beacon') {
-        console.log('event.beacon.type : ' + event.beacon.type);
-        console.log('event.beacon.hwid : ' + event.beacon.hwid);
-        console.log('event.beacon.dm : ' + event.beacon.dm);
+        console.log('*event.beacon.type : ' + event.beacon.type);
+        console.log('*event.beacon.hwid : ' + event.beacon.hwid);
+        console.log('*event.beacon.dm : ' + event.beacon.dm);
+        console.log('*event.source.userId : ' + event.source.userId);
         if (event.beacon.type == 'enter') {
-          reply(event, ' ' + event.beacon.dm + ' ' + event.beacon.type);
+          reply(event.source.userId);
         }
     }
     if (event.type == 'postback'){
