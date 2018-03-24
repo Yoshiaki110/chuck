@@ -111,18 +111,10 @@ app.post('/', function(request, response) {
       console.log('*event.beacon.hwid : ' + event.beacon.hwid);
       console.log('*event.beacon.dm : ' + event.beacon.dm);
       console.log('*event.source.userId : ' + event.source.userId);
-      if (typeof event.beacon.dm === "undefined" || typeof event.beacon.dm == "01") {
-        if (event.beacon.type == 'enter') {
-          reply(event, '近くに装置があります ' + event.beacon.hwid);
-        } else {
-          reply(event, '装置から離れました ' + event.beacon.hwid);
-        }
+      if (event.beacon.type == 'enter') {
+        select(event.source.userId, event.beacon.hwid);
       } else {
-        if (event.beacon.type == 'enter') {
-          select(event.source.userId, event.beacon.hwid);
-        } else {
-          reply(event, 'チャックを開けている人は、離れていきました ' + event.beacon.hwid);
-        }
+        reply(event, 'チャックを閉めたか、あるいは離れていきました ' + event.beacon.hwid);
       }
     }
     if (event.type == 'postback') {

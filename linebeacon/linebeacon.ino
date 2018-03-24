@@ -46,12 +46,10 @@ void loop() {
   int data = digitalRead(D2);
   if (data) {
     digitalWrite(LED, LOW);
-    sdata[9] = 2;
   } else {
     digitalWrite(LED, HIGH);
-    sdata[9] = 1;
+    advertising();      // チャックが開いている時だけ通信
   }
-  advertising();
   Serial.println(data, HEX);
   delay(150);
   //Serial.println("bbb");
