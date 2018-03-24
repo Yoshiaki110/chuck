@@ -1,6 +1,7 @@
 var setting = require('./setting.js');
 var express = require('express');
 var bodyParser = require('body-parser');
+var request = require('request');
 var app = express();
 
 var LINE_CHANNEL_ACCESS_TOKEN = setting.LINE_CHANNEL_ACCESS_TOKEN;
@@ -48,7 +49,7 @@ app.post('/', function(request, response) {
   console.log(request.body.events[0].beacon.dm);
   console.log(request.body.events[0].beacon.type);
   response.sendStatus(200);
-/*  for (var event of request.body.events){
+  for (var event of request.body.events){
     console.log('event.type : ' + event.type);
     console.log('event.source.type : ' + event.source.type);
     if (event.source.type == 'user') {
@@ -73,13 +74,14 @@ app.post('/', function(request, response) {
         console.log(month + '/' + day + ' ' + hour + ':' + min);
         console.log('event.beacon.type : ' + event.beacon.type);
         console.log('event.beacon.hwid : ' + event.beacon.hwid);
+        console.log('event.beacon.dm : ' + event.beacon.dm);
         reply(event, month + '/' + day + ' ' + hour + ':' + min + ' ' + event.beacon.type);
     }
     if (event.type == 'postback'){
       console.log('postback: '+ event.postback.data);
       hash_list[event.source.userId]  = event.postback.data;
     }
-  }*/
+  }
 });
 
 app.listen(app.get('port'), function() {
