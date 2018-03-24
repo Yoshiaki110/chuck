@@ -46,9 +46,9 @@ void loop() {
   int data = digitalRead(D2);
   if (data) {
     digitalWrite(LED, LOW);
+    advertising();      // チャックが開いている時だけ通信
   } else {
     digitalWrite(LED, HIGH);
-    advertising();      // チャックが開いている時だけ通信
   }
   Serial.println(data, HEX);
   delay(150);
