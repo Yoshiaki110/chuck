@@ -1,8 +1,9 @@
+var setting = require('./setting.js');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 
-const LINE_CHANNEL_ACCESS_TOKEN = 'xxxxxxxxxxxxxxx';
+var LINE_CHANNEL_ACCESS_TOKEN = setting.LINE_CHANNEL_ACCESS_TOKEN;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -42,19 +43,20 @@ function reply(event, text){
 app.post('/', function(request, response) {
   console.log('post');
   console.log(request.body);
+  console.log(request.body.events[0].beacon);
   console.log(request.body.events[0].beacon.hwid);
   console.log(request.body.events[0].beacon.dm);
   console.log(request.body.events[0].beacon.type);
   response.sendStatus(200);
-  for (var event of request.body.events){
+/*  for (var event of request.body.events){
     console.log('event.type : ' + event.type);
     console.log('event.source.type : ' + event.source.type);
     if (event.source.type == 'user') {
       console.log('event.source.userId : ' + event.source.userId);
     }
     if (event.type == 'message') {
-        if (event.message.text == 'id' || event.message.text == 'ID' || event.message.text == 'ÇâÇÑ' || event.message.text == 'ÇhÇc'){
-            reply(event, 'Ç†Ç»ÇΩÇÃIDÇÕÅu' + event.source.userId + 'ÅvÇ≈Ç∑');
+        if (event.message.text == 'id' || event.message.text == 'ID' || event.message.text == 'ÔΩâÔΩÑ' || event.message.text == 'Ôº©Ôº§'){
+            reply(event, '„ÅÇ„Å™„Åü„ÅÆID„ÅØ„Äå' + event.source.userId + '„Äç„Åß„Åô');
         } else {
             hash_list[event.source.userId]  = event.message.text;
         }
@@ -77,8 +79,7 @@ app.post('/', function(request, response) {
       console.log('postback: '+ event.postback.data);
       hash_list[event.source.userId]  = event.postback.data;
     }
-  }
-
+  }*/
 });
 
 app.listen(app.get('port'), function() {
