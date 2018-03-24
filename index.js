@@ -8,6 +8,7 @@ var LINE_CHANNEL_ACCESS_TOKEN = setting.LINE_CHANNEL_ACCESS_TOKEN;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.static('img'));
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -40,60 +41,61 @@ function reply(event, text) {
         }
     });
 }
-function reply(id) {
-    var headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
-    }
-//    console.log(headers);
-    var body = {
-        to: id,
-        messages: [{
-            type: 'template',
-            altText: '人を発見',
-            template: {
-                type: "buttons",
-                thumbnailImageUrl: 'https://shakainomado.azurewebsites.net/chuck.png',
-                title: '人を発見',
-                text: 'どうします？',
-                actions: [
-                    {
-                      type: 'postback',
-                      label: 'あいさつする',
-                      data: 'こんにちは'
-                    },
-                    {
-                      type: 'postback',
-                      label: '警告する',
-                      data: 'このくるまは、かんししています'
-                    }
-                ]
-            }
-        }]
-    }
-    console.log(body);
-    var url = 'https://api.line.me/v2/bot/message/push';
-    request({
-        url: url,
-        method: 'POST',
-        headers: headesrs,
-        body: body,
-        json: true
-    }, function(error, response, body){
-        if (!error && response.statusCode == 200) {
-            console.log(body.name);
-        } else {
-            console.log('error: '+ response.statusCode);
-        }
-    });
 
+function reply(id, hwid) {
+  var headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
+  }
+//    console.log(headers);
+  var body = {
+    to: id,
+    messages: [{
+      type: 'template',
+      altText: 'チャックを開けている人を発見',
+      template: {
+        type: "buttons",
+        thumbnailImageUrl: 'https://shakainomado.azurewebsites.net/chuck.png',
+        title: '近くにチャックを開けている人がいます ' + hwid,
+        text: 'どうします？',
+        actions: [
+          {
+            type: 'postback',
+            label: '探して、私が伝えます',
+            data: 'none'
+          },
+          {
+            type: 'postback',
+            label: '恥ずかしいので、電話で教えてあげてください',
+            data: 'tel'
+          }
+        ]
+      }
+    }]
+  }
+  console.log(body);
+  var url = 'https://api.line.me/v2/bot/message/push';
+  request({
+    url: url,
+    method: 'POST',
+    headers: headers,
+    body: body,
+    json: true
+  }, function(error, response, body){
+    if (!error && response.statusCode == 200) {
+      console.log(body.name);
+    } else {
+      console.log('error: '+ response.statusCode);
+    }
+  });
 }
+
 app.post('/', function(request, response) {
   console.log('post');
   console.log(request.body);
   response.sendStatus(200);
 
-  for (var event of request.body.events){
+  for (var event of request.body.events) {
     console.log('event.type : ' + event.type);
 //    console.log('event.source.type : ' + event.source.type);
     console.log('event.source : ' + event.source);
@@ -103,15 +105,25 @@ app.post('/', function(request, response) {
     if (event.type == 'message') {
       console.log('message : ' + event.message.text);
     } else if (event.type == 'beacon') {
-        console.log('*event.beacon.type : ' + event.beacon.type);
-        console.log('*event.beacon.hwid : ' + event.beacon.hwid);
-        console.log('*event.beacon.dm : ' + event.beacon.dm);
-        console.log('*event.source.userId : ' + event.source.userId);
+      console.log('*event.beacon.type : ' + event.beacon.type);
+      console.log('*event.beacon.hwid : ' + event.beacon.hwid);
+      console.log('*event.beacon.dm : ' + event.beacon.dm);
+      console.log('*event.source.userId : ' + event.source.userId);
+      if (typeof event.beacon.dm === "undefined") {
         if (event.beacon.type == 'enter') {
-          reply(event.source.userId);
+          reply(event, '近くに装置があります ' + event.beacon.hwid);
+        } else {
+          reply(event, '装置から離れました ' + event.beacon.hwid);
         }
+      } else {
+        if (event.beacon.type == 'enter') {
+          reply(event.source.userId, event.beacon.hwid);
+        } else {
+          reply(event, 'チャックを開けている人は、離れていきました ' + event.beacon.hwid);
+        }
+      }
     }
-    if (event.type == 'postback'){
+    if (event.type == 'postback') {
       console.log('postback: '+ event.postback.data);
     }
   }
