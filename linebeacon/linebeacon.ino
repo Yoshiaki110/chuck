@@ -2,10 +2,10 @@
 #include "setting.h"
 
 BLEDevice ble;
-
 uint8_t sid[] = {0x6F, 0xFE};
 uint8_t sdata[] = {0x6F, 0xFE, 0x02, 0x01, 0xDE, 0xAD, 0xBE, 0xEF, 0x7F, 0x00};
 uint8_t hwid[] = HWID;
+int cnt = 0;
 
 void advertising() {
   ble.init(); 
@@ -35,23 +35,34 @@ void setup() {
   NRF_POWER->DCDCEN = 0x00000001;
 
   pinMode(LED, OUTPUT);
-  digitalWrite(LED, HIGH);    // LED ON
   pinMode(D2, INPUT_PULLUP);
 
   memcpy(&sdata[3], hwid, 5);
+  for (int i = 0; i < 10; i++) {  // 10秒間ウエイト
+    digitalWrite(LED, HIGH);      // LED ON
+    delay(500);
+    digitalWrite(LED, LOW);       // LED OFF    
+    delay(500);
+  }
 }
 
 void loop() {
-  //Serial.println("aaa");
   int data = digitalRead(D2);
   if (data) {
-    digitalWrite(LED, LOW);
-    advertising();      // チャックが開いている時だけ通信
+    if (++cnt & 0x1) {
+      digitalWrite(LED, HIGH);
+    } else {
+      digitalWrite(LED, LOW);      
+    }
+    if (cnt > 30 ) {        // 3秒間
+      digitalWrite(LED, HIGH);
+      advertising();        // チャックが開いている時だけ通信
+    }
   } else {
-    digitalWrite(LED, HIGH);
+    cnt = 0;
+    digitalWrite(LED, LOW);
   }
   Serial.println(data, HEX);
-  delay(150);
-  //Serial.println("bbb");
+  delay(100);
 }
 
