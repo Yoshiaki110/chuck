@@ -7,6 +7,11 @@ var app = express();
 var LINE_CHANNEL_ACCESS_TOKEN = setting.LINE_CHANNEL_ACCESS_TOKEN;
 var TWILIO_CALL_URL = setting.TWILIO_CALL_URL;
 var TWILIO_CALL_BODY = setting.TWILIO_CALL_BODY;
+var TWILIO_FLOW_URL = setting.TWILIO_FLOW_URL;
+var TWILIO_ACCOUNT_SID = setting.TWILIO_ACCOUNT_SID;
+var TWILIO_AUTH_TOKEN = setting.TWILIO_AUTH_TOKEN;
+var ML_URI = setting.ML_URI;
+var ML_APIKEY = setting.ML_APIKEY;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -126,6 +131,20 @@ app.post('/', function(request, response) {
   }
 });
 
+app.post('/gunma', function(request, response) {
+  console.log('post - gunma');
+  console.log(request.body);
+  response.sendStatus(200);
+//  twilio();
+  twilio2('09093764729');
+});
+
+app.post('/test2', function(request, response) {
+  console.log('post - test2');
+  console.log(request);
+  response.sendStatus(200);
+});
+
 app.listen(app.get('port'), function() {
   console.log("Node app is running at localhost:" + app.get('port'))
 });
@@ -144,5 +163,76 @@ function twilio() {
     headers: headers,
     body: body,
     json: false
+  });
+}
+
+function twilio2(phone) {
+  var headers = {
+    'Accept': '*/*',
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
+  var body = 'To=+81' + phone.substr(1) + '&From=+815031844729';
+  console.log(body);
+  var url = TWILIO_FLOW_URL;
+  request({
+    url: url,
+    method: 'POST',
+    headers: headers,
+    auth: {
+      user: TWILIO_ACCOUNT_SID,
+      password: TWILIO_AUTH_TOKEN
+    },
+    body: body
+  }
+  , function(error, response, body){
+    if (!error && response.statusCode == 200) {
+      console.log(' twilio api sccess');
+    } else {
+      console.log(' twilio api error: '+ response.statusCode);
+      console.log(body);
+    }
+  });
+  console.log(" called " + phone);
+}
+
+function aiapi() {
+  let data = {
+    "Inputs": {
+      "input1": {
+        "ColumnNames": [
+          "time",
+          "count",
+          "ans"
+        ],
+        "Values": [
+          [
+            "0",
+            "0",
+            "0"
+          ]
+        ]
+      }
+    },
+    "GlobalParameters": {}
+  }
+
+  const options = {
+    uri: ML_URI,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + ML_APIKEY,
+    },
+    body: JSON.stringify(data)
+  }
+
+  request(options, (err, res, body) => {
+    if (!err && res.statusCode == 200) {
+      console.log(body);
+      var obj = JSON.parse(body);
+      console.log(obj.Results.output1.value.Values[0][6]);
+    } else {
+      console.log("The request failed with status code: " + res.statusCode);
+    }
   });
 }
