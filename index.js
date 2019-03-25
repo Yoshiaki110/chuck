@@ -141,17 +141,17 @@ app.post('/gunma', function(request, response) {
   
   response.sendStatus(200);
 //  twilio();
-  twilio2('09093764729');
+//  twilio2('09093764729');
+  var now = new Date(Date.now() + 9*60*60*1000);
+  var hour = now.getUTCHours();
+  var day = now.getUTCDay();
+  fs.appendFile('data.csv', day + ',' + hour + ',' + i + '\n', function (err) {
 });
 
 app.get('/gunma', function(request, response) {
   console.log('get - gunma');
   console.log(request.body);
   response.sendStatus(200);
-  var now = new Date(Date.now() + 9*60*60*1000);
-  var hour = now.getUTCHours();
-  var day = now.getUTCDay();
-  fs.appendFile('data.csv', day + ',' + hour + '\n', function (err) {
   });
 
 //  twilio();
