@@ -1,4 +1,5 @@
 var setting = require('./setting.js');
+var fs = require('fs');
 var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
@@ -147,6 +148,12 @@ app.get('/gunma', function(request, response) {
   console.log('get - gunma');
   console.log(request.body);
   response.sendStatus(200);
+  var now = new Date(Date.now() + 9*60*60*1000);
+  var hour = now.getUTCHours();
+  var day = now.getUTCDay();
+  fs.appendFile('data.csv', day + ',' + hour + '\n', function (err) {
+  });
+
 //  twilio();
 //  twilio2('09093764729');
 });
