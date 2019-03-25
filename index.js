@@ -134,9 +134,21 @@ app.post('/', function(request, response) {
 app.post('/gunma', function(request, response) {
   console.log('post - gunma');
   console.log(request.body);
+  console.log(request.body.data);
+  var i = parseInt(request.body.data, 16);
+  aiapi("" + i);
+  
   response.sendStatus(200);
 //  twilio();
   twilio2('09093764729');
+});
+
+app.get('/gunma', function(request, response) {
+  console.log('get - gunma');
+  console.log(request.body);
+  response.sendStatus(200);
+//  twilio();
+//  twilio2('09093764729');
 });
 
 app.post('/test2', function(request, response) {
@@ -195,8 +207,8 @@ function twilio2(phone) {
   console.log(" called " + phone);
 }
 
-function aiapi() {
-  let data = {
+function aiapi(str_cnt) {
+  var data = {
     "Inputs": {
       "input1": {
         "ColumnNames": [
@@ -208,7 +220,7 @@ function aiapi() {
           [
             "0",
             "0",
-            "0"
+            str_cnt
           ]
         ]
       }
@@ -216,7 +228,7 @@ function aiapi() {
     "GlobalParameters": {}
   }
 
-  const options = {
+  var options = {
     uri: ML_URI,
     method: "POST",
     headers: {
