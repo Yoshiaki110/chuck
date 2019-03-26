@@ -13,6 +13,7 @@ var TWILIO_ACCOUNT_SID = setting.TWILIO_ACCOUNT_SID;
 var TWILIO_AUTH_TOKEN = setting.TWILIO_AUTH_TOKEN;
 var ML_URI = setting.ML_URI;
 var ML_APIKEY = setting.ML_APIKEY;
+var GOOGLESHEET_URL = setting.GOOGLESHEET_URL;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -137,7 +138,7 @@ app.post('/gunma', function(request, response) {
   console.log(request.body);
   console.log(request.body.data);
   var i = parseInt(request.body.data, 16);
-  aiapi("" + i);
+//  aiapi("" + i);
   
   response.sendStatus(200);
 //  twilio();
@@ -146,16 +147,15 @@ app.post('/gunma', function(request, response) {
   var hour = now.getUTCHours();
   var day = now.getUTCDay();
   fs.appendFile('data.csv', day + ',' + hour + ',' + i + '\n', function (err) {
+  });
+  google(i);
 });
 
 app.get('/gunma', function(request, response) {
   console.log('get - gunma');
   console.log(request.body);
   response.sendStatus(200);
-  });
-
-//  twilio();
-//  twilio2('09093764729');
+  google(33);
 });
 
 app.post('/test2', function(request, response) {
@@ -168,6 +168,29 @@ app.listen(app.get('port'), function() {
   console.log("Node app is running at localhost:" + app.get('port'))
 });
 
+function google(count) {
+  var now = new Date(Date.now() + 9*60*60*1000);
+  var hour = now.getUTCHours();
+  var day = now.getUTCDay();
+  var data = {"day": day, "hour": hour, "count": count};
+
+  var options = {
+    uri: GOOGLESHEET_URL,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  }
+
+  request(options, (err, res, body) => {
+    if (!err && res.statusCode == 200) {
+      console.log(body);
+    } else {
+      console.log("The request failed with status code: " + res.statusCode);
+    }
+  });
+}
 
 function twilio() {
   var headers = {
