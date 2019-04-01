@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <head>
+    <title>設定画面</title>
+  </head>
+  <script type="text/javascript">
+    function init() {
+      var id = location.search.substring(1);
+      if (id == 'ito') {
+        //Get(id);
+        frm.sensorid.value = id;
+      } else {
+        frm.sensorid.value = 'ID未設定';
+      }
+    }
+    function Get(id) {
+      var req = new XMLHttpRequest();
+      req.open('GET', '/gunma/setting?' + id, true);
+      req.send(null);
+      req.onreadystatechange = function() {
+        if (req.readyState == 4) { // 通信の完了時
+          if (req.status == 200) { // 通信の成功時
+            var obj = JSON.parse(req.responseText);
+            console.log(obj);
+            frm.phone.value = obj.phone;
+            frm.enable.checked = obj.enable;
+          }
+        }
+      }
+    }
+    function inputCheck() {
+        if (frm.phone.value && ! /^[0-9]+$/.test(frm.phone.value)) {
+          alert('電話番号は半角の数字のみ有効です');
+          return false;
+        }
+        return true;
+    }
+    function Post() {
+      if (frm.sensorid.value != 'ID未設定') {
+        if (!inputCheck()) {
+          return;
+        }
+        var req = new XMLHttpRequest();
+        req.open('POST', '/gunma/setting', true);
+        req.setRequestHeader( 'Content-Type', 'application/json');
+        var data = {
+          id: frm.sensorid.value, phone: frm.phone.value, enable: frm.enable.checked
+        };
+//        console.log(data);
+        req.send(JSON.stringify(data));
+        req.onreadystatechange = function() {
+          console.log('req.readyState:' + req.readyState);
+          console.log('req.status:' + req.status);
+          if (req.readyState == 4) { // 通信の完了時
+            if (req.status == 200) { // 通信の成功時
+//              frm.result.value = req.responseText;
+              alert('保存成功\n' + req.responseText);
+            }
+//          } else {
+//            frm.result.value = "通信中..."
+          }
+        }
+      }
+    }
+    function Home() {
+      location.href = '/';
+    }
+    window.onload = init;
+  </script>
+  <body>
+    ■設定画面■
+    <form name="frm">
+      センサID<input type="text" name="sensorid" size="17" disabled="disabled"><br>
+      電話番号<input type="text" name="phone" size="17">有効<input type="checkbox" name="enable"><br>
+      （市外局番から入力、ハイフン不要）<br>
+      <INPUT type="button" name="button2" onClick="Post()" value="設定">
+    </form>
+  </body>
+</html>

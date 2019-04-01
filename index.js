@@ -18,6 +18,7 @@ var GOOGLESHEET_URL = setting.GOOGLESHEET_URL;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('img'));
+app.use(express.static('public'));
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -139,15 +140,18 @@ app.post('/gunma', function(request, response) {
   console.log(request.body.data);
   response.sendStatus(200);
 
+  var id = request.body.device;
   var strVlt = request.body.data.substr(0,4);
   var strCnt = request.body.data.substr(4,2);
   var vlt = parseInt(strVlt, 16);
   var cnt = parseInt(strCnt, 16);
   console.log(strVlt + ' ' + vlt + '   ' + strCnt + ' ' + cnt);
 //  aiapi("" + cnt);
-
+  var json = JSON.parse(fs.readFileSync(id + '.json', 'utf8'));
+  if (json.enable && json.phone != '') {
 //  twilio();
-//  twilio2('09093764729');
+    twilio2(json.phone);
+  }
   var now = new Date(Date.now() + 9*60*60*1000);
   var hour = now.getUTCHours();
   var day = now.getUTCDay();
@@ -161,6 +165,27 @@ app.get('/gunma', function(request, response) {
   console.log(request.body);
   response.sendStatus(200);
   google(33);
+});
+
+// 設定ファイルの読み込み
+app.get('/gunma/setting', function(req, res) {
+  console.log('<>GET /gunma/setting');
+//  console.log(req);
+  var id = req.url.split('?')[1];
+  console.log(' ' + id);
+  var json = JSON.parse(fs.readFileSync(id + '.json', 'utf8'));
+  res.header('Content-Type', 'application/json; charset=utf-8');
+  //res.sendStatus(200);
+  res.send(json);
+});
+
+// 設定ファイルの書き込み
+app.post('/gunma/setting', function(req, res) {
+  console.log('<>POST /gunma/setting');
+//  console.log(req.body);
+  res.sendStatus(200);
+  fs.writeFile(req.body.id + '.json', JSON.stringify(req.body, null, '  '));
+  console.log(' ' + req.body.id + ' ' + req.body.phone + ' ' + req.body.enable);
 });
 
 app.post('/test2', function(request, response) {
